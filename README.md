@@ -6,7 +6,7 @@
 This project is a Python script that fully automates the process of tracking job applications. It scans your Gmail account to intelligently find applications you've sent and replies you've received, then logs everything to a CSV file. The script uses Google's Gemini AI to understand the content of your emails, extracting key information like company name, job role, and application status.
 
 ---
-### ## Key Features 🚀
+### Key Features 🚀
 
 * **Automatic Discovery**: Scans your "Sent" mail to automatically find new job applications you've sent.
 * **Intelligent AI Analysis**: Uses the Gemini AI to accurately extract the **Company Name** and **Job Role** from unstructured email text.
@@ -15,14 +15,14 @@ This project is a Python script that fully automates the process of tracking job
 * **CSV Logging**: Keeps a clean, organized record of all your applications in a `job_applications_auto.csv` file.
 
 ---
-### ## How It Works ⚙️
+###  How It Works ⚙️
 
 The script uses a combination of the **Gmail API** to read your emails and the **Gemini API** for content analysis. It runs in two main phases:
 1.  **Sent Scan**: It first looks for recent applications you've sent to build a list of your current job searches.
 2.  **Inbox Scan**: It then checks for replies related to your applications. If a reply is for a new company, it triggers a targeted history search to backfill the data.
 
 ---
-### ## Setup and Installation
+###  Setup and Installation
 
 Follow these steps to get the script running.
 
