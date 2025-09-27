@@ -10,6 +10,10 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
 
+    # --- NEW: Give the job permission to write back to the repo ---
+    permissions:
+      contents: write
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -34,3 +38,13 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python job_tracker_auto.py
+
+      # --- NEW: This section automatically commits the updated CSV file ---
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "📊 Automated CSV update"
+          file_pattern: job_applications_auto.csv
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
+          commit_author: "GitHub Actions Bot <actions@github.com>"
