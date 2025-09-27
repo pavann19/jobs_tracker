@@ -77,22 +77,52 @@ def update_csv(company_name, role, new_status, notes="", application_date=None):
         writer.writerows(sorted_applications)
     print(f"✅ CSV Updated: '{company_name} ({role})' status set to '{new_status}'")
 
+# --- FINAL Resilient AI Analysis Function ---
 def analyze_email_with_ai(email_content):
+    """Sends email text to the Gemini AI, with automatic retries for rate limits."""
+    
     prompt = f"""
-    Analyze the following email text from a job seeker's email account. Your task is to extract three pieces of information: the company name, the specific job role, and the application status (one of: "Applied", "Interviewing", "Rejected", "Offer", "Unknown"). Return your answer in a strict JSON format. If a value cannot be found, use "Unknown". Example: {{"company_name": "Google", "role": "Software Engineer", "status": "Interviewing"}}
+    Analyze the following email text from a job seeker's email account.
+    Your task is to extract three pieces of information:
+    1. The name of the company involved. Be as precise as possible.
+    2. The specific job role or title (e.g., "Software Engineer", "Data Scientist").
+    3. The status of the application.
+
+    The status can only be one of these five options: "Applied", "Interviewing", "Rejected", "Offer", "Unknown".
+
+    - If the user is sending their application, the status is "Applied".
+    - If a reply invites the user to talk, the status is "Interviewing".
+    - If a reply says they are not moving forward, the status is "Rejected".
+    - If a reply contains a job offer, the status is "Offer".
+
+    Return your answer in a strict JSON format. If a value cannot be found, use "Unknown".
+    Example: {{"company_name": "Google", "role": "Software Engineer", "status": "Interviewing"}}
+
     Here is the email text:
     ---
     {email_content}
     ---
     """
-    try:
-        response = model.generate_content(prompt)
-        json_text = response.text.strip().replace('```json', '').replace('```', '').strip()
-        data = json.loads(json_text)
-        return data.get("company_name"), data.get("role"), data.get("status")
-    except Exception as e:
-        print(f"Error analyzing with AI: {e}")
-        return None, None, None
+    
+    retries = 3 # Number of times to retry before giving up
+    for i in range(retries):
+        try:
+            response = model.generate_content(prompt)
+            json_text = response.text.strip().replace('```json', '').replace('```', '').strip()
+            data = json.loads(json_text)
+            return data.get("company_name"), data.get("role"), data.get("status")
+        except Exception as e:
+            # Check if the exception is due to a rate limit error (429)
+            if "429" in str(e):
+                print("⏳ Rate limit reached. Waiting for 61 seconds before retrying...")
+                time.sleep(61) # Wait for a full minute plus one second
+                continue # Go to the next iteration of the loop to retry
+            else:
+                print(f"An unexpected error occurred: {e}")
+                return None, None, None # Return None for other errors
+    
+    print("❌ Failed to analyze with AI after several retries due to persistent errors.")
+    return None, None, None
 
 def find_original_application(service, label_id, company_name, role):
     print(f"-> Searching history for original application to '{company_name}' for role '{role}'...")
