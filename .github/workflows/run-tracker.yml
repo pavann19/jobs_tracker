@@ -1,0 +1,36 @@
+name: Run Daily Job Tracker
+
+on:
+  schedule:
+    # Runs at 05:30 UTC every day (11:00 AM IST)
+    - cron: '30 5 * * *'
+  workflow_dispatch: # Allows you to run it manually from the Actions tab
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create secret files
+        env:
+          CREDENTIALS: ${{ secrets.CREDENTIALS_JSON }}
+          TOKEN: ${{ secrets.TOKEN_JSON }}
+        run: |
+          echo "$CREDENTIALS" > credentials.json
+          echo "$TOKEN" > token.json
+
+      - name: Run the job tracker script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python job_tracker_auto.py
