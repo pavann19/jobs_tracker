@@ -17,7 +17,7 @@ if not API_KEY:
     exit()
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('models/Gemini 2.5 Flash-Lite')
+model = genai.GenerativeModel('Gemini 2.5 Flash-Lite')
 
 # --- CONFIGURATION ---
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
